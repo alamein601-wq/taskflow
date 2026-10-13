@@ -4,6 +4,7 @@ import { LoginPage } from './pages/login-page';
 import { SignupPage } from './pages/signup-page';
 import Dashboard from './pages/dashboard.jsx';
 import AboutPage from './pages/about-page.jsx';
+import AIChat from './components/AIChat';
 import './App.css';
 import { useEffect } from 'react';
 import Navbar from './components/layout/navbar.jsx';
@@ -11,11 +12,11 @@ import Footer from './components/layout/footer.jsx';
 import PrivacyPage from './pages/privacy-page';
 import TermsPage from './pages/terms-page';
 import NotFound from './pages/not-found';
+
 function App() {
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
-
 
   return (
     <BrowserRouter>
@@ -25,6 +26,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/ai-chat" element={<AIChat />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/terms" element={<TermsPage />} />
@@ -36,3 +38,4 @@ function App() {
 }
 
 export default App;
+
