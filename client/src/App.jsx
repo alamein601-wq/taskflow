@@ -12,6 +12,7 @@ import Footer from './components/layout/footer.jsx';
 import PrivacyPage from './pages/privacy-page';
 import TermsPage from './pages/terms-page';
 import NotFound from './pages/not-found';
+import { Analytics } from '@vercel/analytics/react';
 
 function App() {
   useEffect(() => {
@@ -33,6 +34,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+      <Analytics />
     </BrowserRouter>
   );
 }
