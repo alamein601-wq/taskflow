@@ -38,7 +38,7 @@ export function LoginForm({
     // সার্ভারের ঝামেলা ছাড়াই লোকাল স্টোরেজ দিয়ে ইনস্ট্যান্ট লগইন চেক
     setTimeout(() => {
       const savedUser = localStorage.getItem('taskflow_current_user');
-      
+
       if (savedUser) {
         const userData = JSON.parse(savedUser);
         if (userData.email === email) {
@@ -75,7 +75,7 @@ export function LoginForm({
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
-              
+
               {error && (
                 <div className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg text-center">
                   {error}
@@ -101,7 +101,8 @@ export function LoginForm({
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password" classname="text-slate-300">পাসওয়ার্ড</Label>
+                  {/* এখানে আগে ছোট হাতের classname ছিলো, যা ঠিক করে className করা হয়েছে */}
+                  <Label htmlFor="password" className="text-slate-300">পাসওয়ার্ড</Label>
                 </div>
                 <Input 
                   id="password" 
