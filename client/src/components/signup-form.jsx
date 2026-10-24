@@ -38,11 +38,12 @@ export function SignupForm({ className, ...props }) {
       const userData = { name, email, password };
       localStorage.setItem('taskflow_current_user', JSON.stringify(userData));
 
-      setSuccess("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! লগইন পেজে নিয়ে যাওয়া হচ্ছে...");
+      setSuccess("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! সরাসরি ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...");
       setIsLoading(false);
-      
+
+      // সরাসরি ড্যাশবোর্ডে রিডাইরেক্ট
       setTimeout(() => {
-        navigate('/login'); // সফল হওয়ার পর লগইন পেজে পাঠিয়ে দেবে
+        navigate('/dashboard'); 
       }, 1000);
     }, 500);
   };
@@ -59,7 +60,7 @@ export function SignupForm({ className, ...props }) {
         <CardContent>
           <form onSubmit={submitHandle}>
             <div className="flex flex-col gap-6">
-              
+
               {error && (
                 <div className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg text-center">
                   {error}
