@@ -9,184 +9,120 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react";
-import api from "@/lib/api"
-export function SignupForm({
-  className,
-  ...props
-}) {
-  const [isLoading, setIsLoading] = useState(false);
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+
+export function SignupForm({ className, ...props }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const submitHandle = async (e) => {
+  const submitHandle = (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
     setSuccess("");
 
-    try {
-      const formData = new FormData(e.target);
-      const data = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        password: formData.get('password'),
-        confirmPassword: formData.get('confirmPassword')
-      };
-
-      // Validate passwords match
-      if (data.password !== data.confirmPassword) {
-        setError("Passwords do not match");
-        setIsLoading(false);
-        return;
-      }
-
-      console.log("Sending signup request:", data);
-      
-      const response = await api.post('/auth/register', {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      });
-
-      console.log("Signup response:", response.data);
-
-      if (response.data.success) {
-        setSuccess("Account created successfully! Please log in.");
-        // Navigate to login page after 2 seconds
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
-      }
-    } catch (error) {
-      console.error("Signup form submission error:", error);
-      if (error.response) {
-        setError(error.response.data.message || "Signup failed. Please try again.");
-      } else if (error.request) {
-        setError("Network error. Please check your connection and try again.");
-      } else {
-        setError("An unexpected error occurred. Please try again.");
-      }
-    } finally {
-      setIsLoading(false);
+    if (!name || !email || !password) {
+      setError("দয়া করে সব ঘরগুলো পূরণ করুন।");
       return;
     }
-  }
 
-  const handleSignInClick = () => {
-    window.location.href = '/login';
-  }
+    setIsLoading(true);
+
+    setTimeout(() => {
+      // লোকাল স্টোরেজে ইউজার ডাটা সেভ করা
+      const userData = { name, email, password };
+      localStorage.setItem('taskflow_current_user', JSON.stringify(userData));
+
+      setSuccess("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! লগইন পেজে নিয়ে যাওয়া হচ্ছে...");
+      setIsLoading(false);
+      
+      setTimeout(() => {
+        navigate('/login'); // সফল হওয়ার পর লগইন পেজে পাঠিয়ে দেবে
+      }, 1000);
+    }, 500);
+  };
 
   return (
-    <div className={cn("flex flex-col gap-6 w-full max-w-sm mx-auto", className)} {...props}>
-      <Card className="border-gray-800 bg-gray-900/90 backdrop-blur-sm shadow-2xl">
-        <CardHeader className="text-center space-y-2">
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-2 shadow-lg">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-          </div>
-          <CardTitle className="text-2xl font-bold text-white">Create your account</CardTitle>
-          <CardDescription className="text-gray-400">
-            Join TaskFlow and start organizing your tasks
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card className="bg-slate-900 border-slate-800 text-white">
+        <CardHeader>
+          <CardTitle className="text-2xl text-blue-500">Taskflow AI অ্যাকাউন্ট তৈরি করুন</CardTitle>
+          <CardDescription className="text-slate-400">
+            টাস্ক অর্গানাইজ করা শুরু করতে আপনার তথ্য দিন
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
+          <form onSubmit={submitHandle}>
+            <div className="flex flex-col gap-6">
+              
+              {error && (
+                <div className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg text-center">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="p-3 text-sm text-emerald-400 bg-emerald-950/50 border border-emerald-800 rounded-lg text-center">
+                  {success}
+                </div>
+              )}
 
-          {/* Success Message */}
-          {success && (
-            <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-              <p className="text-green-400 text-sm">{success}</p>
-            </div>
-          )}
+              <div className="grid gap-2">
+                <Label htmlFor="name" className="text-slate-300">পূর্ণ নাম</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="আপনার নাম"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-slate-950 border-slate-700 text-white"
+                  required
+                />
+              </div>
 
-          <form className="space-y-4" onSubmit={submitHandle}>
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-300 text-sm font-medium">Full Name</Label>
-              <Input 
-                id="name" 
-                name="name"
-                type="text" 
-                placeholder="Enter your full name" 
-                required 
-                disabled={isLoading}
-                className="bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-11 rounded-lg transition-all duration-200"
-              />
+              <div className="grid gap-2">
+                <Label htmlFor="email" className="text-slate-300">ইমেইল ঠিকানা</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-slate-950 border-slate-700 text-white"
+                  required
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="password" className="text-slate-300">পাসওয়ার্ড</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-slate-950 border-slate-700 text-white"
+                  required 
+                />
+              </div>
+
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 text-white" disabled={isLoading}>
+                {isLoading ? "তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
+              </Button>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300 text-sm font-medium">Email address</Label>
-              <Input 
-                id="email" 
-                name="email"
-                type="email" 
-                placeholder="Enter your email" 
-                required 
-                disabled={isLoading}
-                className="bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-11 rounded-lg transition-all duration-200"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300 text-sm font-medium">Password</Label>
-              <Input 
-                id="password" 
-                name="password"
-                type="password" 
-                placeholder="Create a password" 
-                required 
-                disabled={isLoading}
-                className="bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-11 rounded-lg transition-all duration-200"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-gray-300 text-sm font-medium">Confirm Password</Label>
-              <Input 
-                id="confirmPassword" 
-                name="confirmPassword"
-                type="password" 
-                placeholder="Confirm your password" 
-                required 
-                disabled={isLoading}
-                className="bg-gray-800/50 border-gray-700 text-white placeholder:text-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 h-11 rounded-lg transition-all duration-200"
-              />
-            </div>
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 h-11 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Creating Account..." : "Create Account"}
-            </Button>
-            <div className="text-center pt-4">
-              <span className="text-gray-400 text-sm">Already have an account? </span>
-              <button 
-                type="button"
-                onClick={handleSignInClick}
-                disabled={isLoading}
-                className="text-blue-400 hover:text-blue-300 font-medium text-sm transition-colors disabled:opacity-50"
-              >
-                Sign in
-              </button>
+
+            <div className="mt-4 text-center text-sm text-slate-400">
+              ইতিমধ্যেই অ্যাকাউন্ট আছে?{" "}
+              <Link to="/login" className="text-blue-400 underline underline-offset-4">
+                লগইন করুন
+              </Link>
             </div>
           </form>
         </CardContent>
       </Card>
-      
-      <div className="text-center text-xs text-gray-500 leading-relaxed">
-        By creating an account, you agree to our{" "}
-        <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">
-          Privacy Policy
-        </a>
-      </div>
     </div>
-  );
+  )
 }
