@@ -12,20 +12,21 @@ import { Label } from "@/components/ui/label"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "@/lib/api"
+
 export function LoginForm({
   className,
   ...props
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState("");
-  const[error, setError] = useState("");
-  
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
+
   const submitHandle = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    setSuccess("");
     setSuccess("");
 
     try {
@@ -46,14 +47,15 @@ export function LoginForm({
 
       if (response.data.success) {
         setSuccess("Login successful! Redirecting...");
-        // Store token in localStorage
+        
         const token = response.data.data?.token || response.data.token;
         if (token) {
           localStorage.setItem('token', token);
         }
-        // Navigate to dashboard after 2 seconds
+
+        // সঠিক রিডাইরেক্ট (React Router নেভিগেশন)
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          navigate('/dashboard');
         }, 2000);
       }
     } catch (error) {
@@ -67,9 +69,8 @@ export function LoginForm({
       }
     } finally {
       setIsLoading(false);
-      return;
     }
-  }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6 w-full max-w-sm mx-auto", className)} {...props}>
@@ -92,12 +93,12 @@ export function LoginForm({
             </div>
           )}
 
-          {/* Success Message */}
           {success && (
             <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
               <p className="text-green-400 text-sm">{success}</p>
             </div>
           )}
+
           <form className="space-y-4" onSubmit={submitHandle}>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-gray-300 text-sm font-medium">Email address</Label>
@@ -112,6 +113,7 @@ export function LoginForm({
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="password" className="text-gray-300 text-sm font-medium">Password</Label>
               <Input 
                 id="password" 
                 name="password"
@@ -142,17 +144,6 @@ export function LoginForm({
           </form>
         </CardContent>
       </Card>
-      
-      <div className="text-center text-xs text-gray-500 leading-relaxed">
-        By signing in, you agree to our{" "}
-        <a href="/terms" className="text-blue-400 hover:text-blue-300 transition-colors">
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a href="/privacy" className="text-blue-400 hover:text-blue-300 transition-colors">
-          Privacy Policy
-        </a>
-      </div>
     </div>
   );
 }
