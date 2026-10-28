@@ -10,7 +10,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "@/lib/api"
+
 export function SignupForm({
   className,
   ...props
@@ -18,6 +20,8 @@ export function SignupForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const navigate = useNavigate();
 
   const submitHandle = async (e) => {
     e.preventDefault();
@@ -42,7 +46,7 @@ export function SignupForm({
       }
 
       console.log("Sending signup request:", data);
-      
+
       const response = await api.post('/auth/register', {
         name: data.name,
         email: data.email,
@@ -53,9 +57,9 @@ export function SignupForm({
 
       if (response.data.success) {
         setSuccess("Account created successfully! Please log in.");
-        // Navigate to login page after 2 seconds
+        // React Router নেভিগেশন ব্যবহার করে ২ সেকেন্ড পর লগইন পেজে রিডাইরেক্ট
         setTimeout(() => {
-          window.location.href = '/login';
+          navigate('/login');
         }, 2000);
       }
     } catch (error) {
@@ -69,12 +73,11 @@ export function SignupForm({
       }
     } finally {
       setIsLoading(false);
-      return;
     }
   }
 
   const handleSignInClick = () => {
-    window.location.href = '/login';
+    navigate('/login');
   }
 
   return (
@@ -176,7 +179,7 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
-      
+
       <div className="text-center text-xs text-gray-500 leading-relaxed">
         By creating an account, you agree to our{" "}
         <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">
