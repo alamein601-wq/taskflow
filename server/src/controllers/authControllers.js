@@ -135,4 +135,3 @@ export const logout=(req,res)=>{
         message:"Logout successfully"
     })
 }
-
