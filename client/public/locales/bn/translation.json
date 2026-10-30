@@ -1,0 +1,19 @@
+
+{
+  "welcome": "TaskFlow AI-তে স্বাগতম",
+  "login": "লগইন",
+  "signup": "সাইন আপ",
+  "logout": "লগআউট",
+  "dashboard": "ড্যাশবোর্ড",
+  "tasks": "কাজসমূহ",
+  "settings": "সেটিংস",
+  "profile": "প্রোফাইল",
+  "email": "ইমেইল",
+  "password": "পাসওয়ার্ড",
+  "name": "নাম",
+  "submit": "জমা দিন",
+  "cancel": "বাতিল",
+  "language": "ভাষা",
+  "english": "ইংরেজি",
+  "bengali": "বাংলা"
+}
