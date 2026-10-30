@@ -1,5 +1,18 @@
 {
-  "welcome": "Welcome to Taskflow AI",
+  "welcome": "Welcome to TaskFlow AI",
   "login": "Login",
-  "signup": "Sign Up"
+  "signup": "Sign Up",
+  "logout": "Logout",
+  "dashboard": "Dashboard",
+  "tasks": "Tasks",
+  "settings": "Settings",
+  "profile": "Profile",
+  "email": "Email",
+  "password": "Password",
+  "name": "Name",
+  "submit": "Submit",
+  "cancel": "Cancel",
+  "language": "Language",
+  "english": "English",
+  "bengali": "Bengali"
 }
