@@ -1,26 +1,12 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: {
-        translation: {
-          welcome: "Welcome"
-        }
-      },
-      bn: {
-        translation: {
-          welcome: "স্বাগতম"
-        }
-      }
-    },
-    lng: "en",
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false
-    }
-  });
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import './lib/i18n.js';
+import App from './App.jsx';
 
-export default i18n;
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
