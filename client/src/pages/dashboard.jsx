@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -36,7 +35,6 @@
   </script>
   
   <style>
-    /* Custom Smooth Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -51,16 +49,9 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #22c55e;
     }
-
-    /* Vibrant Glows */
     .glow-green {
       box-shadow: 0 0 20px rgba(34, 197, 94, 0.35);
     }
-    .glow-blue {
-      box-shadow: 0 0 20px rgba(14, 165, 233, 0.35);
-    }
-
-    /* Glassmorphism Dynamic Animation */
     .card-hover {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -68,33 +59,49 @@
       transform: translateY(-5px) scale(1.015);
       box-shadow: 0 14px 35px -10px rgba(34, 197, 94, 0.4);
     }
+    /* Google Translate Widget Styling */
+    .goog-te-banner-frame.skiptranslate { display: none !important; }
+    body { top: 0px !important; }
+    #google_translate_element select {
+      background-color: #0d1630;
+      color: white;
+      border: 1px solid #1e293b;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body class="bg-[#030712] text-white font-sans antialiased min-h-screen overflow-x-hidden selection:bg-[#22c55e] selection:text-black">
 
   <div id="app" class="flex h-screen overflow-hidden">
 
-    <!-- ==================== SIDEBAR ==================== -->
-    <aside class="hidden lg:flex flex-col w-[260px] bg-[#070c1e] border-r border-[#1e293b]/70 flex-shrink-0 z-30 justify-between select-none">
+    <!-- ==================== SIDEBAR (Desktop & Mobile Drawer) ==================== -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col w-[260px] bg-[#070c1e] border-r border-[#1e293b]/70 flex-shrink-0 z-50 justify-between select-none">
       <div>
         <!-- Brand Logo Header -->
-        <div class="p-5 border-b border-[#1e293b]/60 flex items-center space-x-3">
-          <div class="relative w-11 h-11 bg-gradient-to-br from-black to-[#09182b] rounded-xl border border-[#22c55e]/40 flex items-center justify-center shadow-lg group overflow-hidden">
-            <div class="absolute inset-0 bg-[#22c55e]/20 blur-md group-hover:bg-[#22c55e]/40 transition-all"></div>
-            <!-- TaskFlow AI Logo Icon -->
-            <svg class="w-8 h-8 relative z-10 text-[#22c55e]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 25H85V38H58V85H42V38H15V25Z" fill="#22c55e"/>
-              <path d="M55 25L75 45H60L40 25H55Z" fill="#0ea5e9"/>
-              <path d="M35 55L65 85H50L20 55H35Z" fill="#22c55e"/>
-              <circle cx="50" cy="50" r="8" fill="#ffffff"/>
-            </svg>
+        <div class="p-5 border-b border-[#1e293b]/60 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="relative w-11 h-11 bg-gradient-to-br from-black to-[#09182b] rounded-xl border border-[#22c55e]/40 flex items-center justify-center shadow-lg group overflow-hidden">
+              <div class="absolute inset-0 bg-[#22c55e]/20 blur-md group-hover:bg-[#22c55e]/40 transition-all"></div>
+              <svg class="w-8 h-8 relative z-10 text-[#22c55e]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 25H85V38H58V85H42V38H15V25Z" fill="#22c55e"/>
+                <path d="M55 25L75 45H60L40 25H55Z" fill="#0ea5e9"/>
+                <path d="M35 55L65 85H50L20 55H35Z" fill="#22c55e"/>
+                <circle cx="50" cy="50" r="8" fill="#ffffff"/>
+              </svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-xl font-extrabold tracking-tight text-white flex items-center">
+                TaskFlow <span class="text-[#22c55e] ml-1">AI</span>
+              </span>
+              <span class="text-[10px] text-slate-400 font-medium tracking-tight">Find Work. Grow Your Life.</span>
+            </div>
           </div>
-          <div class="flex flex-col">
-            <span class="text-xl font-extrabold tracking-tight text-white flex items-center">
-              TaskFlow <span class="text-[#22c55e] ml-1">AI</span>
-            </span>
-            <span class="text-[10px] text-slate-400 font-medium tracking-tight">Find Work. Grow Your Life.</span>
-          </div>
+          <!-- Close button for mobile -->
+          <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white text-lg">✕</button>
         </div>
 
         <!-- Sidebar Links -->
@@ -106,49 +113,49 @@
             <span>Dashboard</span>
           </a>
 
-          <a href="#find-jobs" onclick="openModule('Find Jobs Worldwide')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
+          <a href="javascript:void(0)" onclick="openModule('Find Jobs Worldwide')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
             <svg class="w-5 h-5 text-slate-400 group-hover:text-[#22c55e] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
             <span>Find Jobs</span>
           </a>
 
-          <a href="#remote-work" onclick="openModule('Remote Work Online')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
+          <a href="javascript:void(0)" onclick="openModule('Remote Work Online')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
             <svg class="w-5 h-5 text-slate-400 group-hover:text-[#22c55e] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
             <span>Remote Work</span>
           </a>
 
-          <a href="#freelance" onclick="openModule('Freelance Marketplace')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
+          <a href="javascript:void(0)" onclick="openModule('Freelance Marketplace')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
             <svg class="w-5 h-5 text-slate-400 group-hover:text-[#22c55e] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
             </svg>
             <span>Freelance Market</span>
           </a>
 
-          <a href="#cv-profile" onclick="openModule('Create CV & Resume')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
+          <a href="javascript:void(0)" onclick="openModule('Create CV & Resume')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
             <svg class="w-5 h-5 text-slate-400 group-hover:text-[#22c55e] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
             <span>My CV & Profile</span>
           </a>
 
-          <a href="#career-planner" onclick="openModule('Career Growth Planner')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
+          <a href="javascript:void(0)" onclick="openModule('Career Growth Planner')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
             <svg class="w-5 h-5 text-slate-400 group-hover:text-[#22c55e] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
             </svg>
             <span>Career Planner</span>
           </a>
 
-          <a href="#hiring" onclick="openModule('Hiring & Recruitment')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
+          <a href="javascript:void(0)" onclick="openModule('Hiring & Recruitment')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
             <svg class="w-5 h-5 text-slate-400 group-hover:text-[#22c55e] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
             </svg>
             <span>Hiring & Recruiters</span>
           </a>
 
-          <a href="#trusted-sites" onclick="openModule('Verified Job Sites')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
+          <a href="javascript:void(0)" onclick="openModule('Verified Job Sites')" class="flex items-center space-x-3 text-slate-300 hover:bg-[#101935] hover:text-white px-4 py-2.5 rounded-xl transition-all group">
             <svg class="w-5 h-5 text-slate-400 group-hover:text-[#22c55e] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
             </svg>
@@ -159,42 +166,58 @@
 
       <!-- Bottom Premium Button -->
       <div class="p-4 border-t border-[#1e293b]/60">
-        <button class="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-500/20 via-[#22c55e]/20 to-emerald-500/20 hover:from-amber-500/30 hover:to-emerald-500/30 border border-[#22c55e]/40 text-[#22c55e] font-bold px-4 py-3 rounded-xl transition-all shadow-md group">
+        <button onclick="openModule('Premium Experience')" class="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-amber-500/20 via-[#22c55e]/20 to-emerald-500/20 hover:from-amber-500/30 hover:to-emerald-500/30 border border-[#22c55e]/40 text-[#22c55e] font-bold px-4 py-3 rounded-xl transition-all shadow-md group">
           <span class="text-base group-hover:scale-125 transition-transform">👑</span>
           <span class="text-xs uppercase tracking-wider font-extrabold text-white">Premium Experience</span>
         </button>
       </div>
     </aside>
 
+    <!-- Sidebar Backdrop for mobile -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden"></div>
+
 
     <!-- ==================== MAIN CONTENT ==================== -->
     <main class="flex-1 flex flex-col h-full overflow-y-auto bg-[#030712] relative">
 
       <!-- TOP STICKY HEADER -->
-      <header class="px-4 lg:px-8 py-3.5 bg-[#070c1e]/90 backdrop-blur-md border-b border-[#1e293b]/60 flex items-center justify-between sticky top-0 z-40 gap-4">
+      <header class="px-4 lg:px-8 py-3.5 bg-[#070c1e]/90 backdrop-blur-md border-b border-[#1e293b]/60 flex items-center justify-between sticky top-0 z-30 gap-4">
         
-        <!-- Global Search Bar -->
-        <div class="flex-1 max-w-2xl relative">
-          <div class="relative flex items-center">
-            <span class="absolute left-4 text-slate-400">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-            </span>
-            <input 
-              id="searchInput"
-              type="text" 
-              placeholder="Search jobs, skills or companies..." 
-              class="w-full bg-[#0d1630] border border-[#1e293b] hover:border-slate-600 focus:border-[#22c55e] text-sm text-white placeholder-slate-400 rounded-full pl-11 pr-12 py-2.5 transition-all outline-none"
-            />
-            <button onclick="toggleVoiceSearch()" id="micBtn" class="absolute right-4 text-slate-400 hover:text-[#22c55e] transition-colors" title="Voice Search">
-              🎙️
-            </button>
+        <div class="flex items-center space-x-3 flex-1 max-w-2xl">
+          <!-- Mobile Menu Toggle Button -->
+          <button onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl bg-[#0d1630] border border-[#1e293b] text-slate-300 hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+
+          <!-- Global Search Bar -->
+          <div class="relative w-full">
+            <div class="relative flex items-center">
+              <span class="absolute left-4 text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+              </span>
+              <input 
+                id="searchInput"
+                type="text" 
+                placeholder="Search jobs, skills or companies..." 
+                class="w-full bg-[#0d1630] border border-[#1e293b] hover:border-slate-600 focus:border-[#22c55e] text-sm text-white placeholder-slate-400 rounded-full pl-11 pr-12 py-2.5 transition-all outline-none"
+              />
+              <button onclick="toggleVoiceSearch()" id="micBtn" class="absolute right-4 text-slate-400 hover:text-[#22c55e] transition-colors" title="Voice Search">
+                🎙️
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- Controls: Notifications & User Profile -->
-        <div class="flex items-center space-x-4">
+        <!-- Controls: Language Selector, Notifications & User Profile -->
+        <div class="flex items-center space-x-3 sm:space-x-4">
+          
+          <!-- Google Auto Language Translator Widget -->
+          <div id="google_translate_element" title="Change Language"></div>
+
           <button class="relative p-2.5 rounded-full bg-[#0d1630] border border-[#1e293b] hover:border-[#22c55e] transition-all text-slate-300 hover:text-white">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
@@ -489,7 +512,7 @@
       </div>
 
       <!-- 5. BOTTOM FOOTER WARNING BAR -->
-      <footer class="mt-8 px-4 lg:px-8 py-3 bg-[#050a17] border-t border-[#1e293b]/80 flex flex-col md:flex-row items-center justify-between gap-4 sticky bottom-0 z-30">
+      <footer class="mt-8 px-4 lg:px-8 py-3 bg-[#050a17] border-t border-[#1e293b]/80 flex flex-col md:flex-row items-center justify-between gap-4 sticky bottom-0 z-20">
         <div class="hidden sm:flex items-end space-x-1 h-5 opacity-70">
           <div class="w-1.5 h-3 bg-[#22c55e]/40 rounded-t-sm"></div>
           <div class="w-2 h-5 bg-[#22c55e]/80 rounded-t-sm"></div>
@@ -504,10 +527,10 @@
           <span>External job links — verify each vacancy before applying</span>
         </div>
 
-        <a href="#find-jobs" onclick="openModule('Find Jobs')" class="inline-flex items-center space-x-2 bg-[#22c55e] hover:bg-[#1eb155] text-black font-extrabold text-xs px-4 py-2 rounded-full shadow-lg glow-green transition-all">
+        <button onclick="openModule('Find Jobs')" class="inline-flex items-center space-x-2 bg-[#22c55e] hover:bg-[#1eb155] text-black font-extrabold text-xs px-4 py-2 rounded-full shadow-lg glow-green transition-all">
           <span>A Smarter Way to Find Work</span>
           <span class="text-sm">➔</span>
-        </a>
+        </button>
       </footer>
 
     </main>
@@ -526,9 +549,30 @@
     </div>
   </div>
 
+  <!-- GOOGLE TRANSLATE SCRIPT -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'bn,en,ar,es,hi,zh-CN,fr,de,ja,ru',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <!-- JAVASCRIPT INTERACTION LOGIC -->
   <script>
-    // Search Interactivity
+    // Sidebar Toggle for Mobile View
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      sidebar.classList.toggle('-translate-x-full');
+      backdrop.classList.toggle('hidden');
+    }
+
+    // Search Interactivity Fix
     const searchInput = document.getElementById('searchInput');
     const cardsGrid = document.getElementById('cardsGrid');
 
@@ -571,4 +615,3 @@
   </script>
 </body>
 </html>
-```
