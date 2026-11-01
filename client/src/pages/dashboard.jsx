@@ -1,4 +1,4 @@
-Import React, { useState } from 'react';
+import React, { useState } from 'react';
 
 const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
