@@ -1,603 +1,161 @@
-import React, { useState, useEffect } from 'react';
-import {
-  CheckSquare,
-  Plus,
-  Edit,
-  Trash2,
-  Archive,
-  Calendar,
-  Tag,
-  Filter,
-  Grid,
-  List,
-  Menu,
-  X,
-  User,
-  Bell,
-  Settings,
-  BarChart3,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Moon,
-  Sun,
-  Home,
-  Folder,
-  TrendingUp,
-  Target,
-  Zap
-} from 'lucide-react';
-import api from "@/lib/api";
+import React, { useState } from 'react';
 
 const Dashboard = () => {
-  const [user, setUser] = useState(null);
-  const getUser = localStorage.getItem('token');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isListening, setIsListening] = useState(false);
+  const [speechError, setSpeechError] = useState('');
   
-  useEffect(() => {
-    if (getUser) {
-      api.get('/auth/profile', { headers: { Authorization: `Bearer ${getUser}` } })
-        .then(res => setUser(res.data.data.user))
-        .catch(err => console.error('Error fetching profile:', err));
-    }
-  }, [getUser]);
-  
-  const userId = user?._id;
-  const token = localStorage.getItem('token');
-  const apiConfig = { headers: { Authorization: `Bearer ${token}` } };
+  // Language state: 'en' = English, 'bn' = Bangla
+  const [lang, setLang] = useState('bn');
 
-  const [loadingTasks, setLoadingTasks] = useState(false);
-  const [tasks, setTasks] = useState([]);
-  const [categories, setCategories] = useState([]);
-
-  useEffect(() => {
-    if (!token) {
-      window.location.href = '/login';
-      return;
-    }
-    if (!userId) return; 
-
-    setLoadingTasks(true);
-    api.get('/todos', { ...apiConfig, params: { userId } })
-      .then(res => {
-        let todos = [];
-        if (res.data && res.data.data && Array.isArray(res.data.data.todos)) {
-          todos = res.data.data.todos.map(todo => ({
-            ...todo,
-            id: todo._id || todo.id
-          }));
-        }
-        setTasks(todos);
-      })
-      .catch(err => {
-        const msg = err?.response?.data?.message || 'Error fetching tasks';
-        showNotification(msg, 'error');
-      })
-      .finally(() => setLoadingTasks(false));
-  }, [token, userId]);
-
-  useEffect(() => {
-    if (!token) return;
-    api.get('/categories', apiConfig)
-      .then(res => {
-        if (res.data && res.data.data && Array.isArray(res.data.data.categories)) {
-          const cats = res.data.data.categories.map(cat => ({
-            ...cat,
-            id: cat._id || cat.id,
-            count: tasks.filter(task => task.category === cat.name && !task.archived).length
-          }));
-          setCategories(cats);
-        }
-      })
-      .catch(() => {
-        showNotification('Error fetching categories', 'error');
-      });
-  }, [token, tasks]);
-
-  const [currentView, setCurrentView] = useState('dashboard');
-  const [viewMode, setViewMode] = useState('list');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showTaskModal, setShowTaskModal] = useState(false);
-  const [showTaskDetailsModal, setShowTaskDetailsModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [filterBy, setFilterBy] = useState('all');
-  const [notifications, setNotifications] = useState([]);
-
-  const [taskForm, setTaskForm] = useState({
-    title: '',
-    description: '',
-    dueDate: '',
-    priority: 'medium',
-    category: ''
-  });
-
-  const [categoryForm, setCategoryForm] = useState({
-    name: '',
-    color: 'bg-blue-500'
-  });
-
-  const showNotification = (message, type = 'success') => {
-    const id = Date.now();
-    setNotifications(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
-    }, 3000);
-  };
-
-  const openTaskModal = (task = null) => {
-    if (task) {
-      setEditingTask(task);
-      setTaskForm({
-        title: task.title || '',
-        description: task.description || '',
-        dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
-        priority: task.priority || 'medium',
-        category: task.category || ''
-      });
-    } else {
-      setEditingTask(null);
-      setTaskForm({ title: '', description: '', dueDate: '', priority: 'medium', category: '' });
-    }
-    setShowTaskModal(true);
-  };
-
-  const openTaskDetailsModal = (task) => {
-    setSelectedTask(task);
-    setShowTaskDetailsModal(true);
-  };
-
-  const openCategoryModal = (category = null) => {
-    if (category) {
-      setEditingCategory(category);
-      setCategoryForm({ name: category.name, color: category.color });
-    } else {
-      setEditingCategory(null);
-      setCategoryForm({ name: '', color: 'bg-blue-500' });
-    }
-    setShowCategoryModal(true);
-  };
-
-  const filteredTasks = tasks.filter(task => {
-    if (filterBy === 'all') return !task.archived;
-    if (filterBy === 'today') {
-      const today = new Date().toISOString().split('T')[0];
-      return !task.archived && task.dueDate && task.dueDate.split('T')[0] === today;
-    }
-    if (filterBy === 'upcoming') {
-      const today = new Date();
-      return !task.archived && task.dueDate && new Date(task.dueDate) > today;
-    }
-    if (filterBy === 'completed') return task.completed && !task.archived;
-    if (filterBy === 'archived') return task.archived;
-    return !task.archived && task.category === filterBy;
-  });
-
-  const addTask = () => {
-    if (!taskForm.title.trim()) {
-      showNotification('Please enter a task title', 'error');
-      return;
-    }
-
-    const newTask = {
-      title: taskForm.title.trim(),
-      description: taskForm.description.trim(),
-      dueDate: taskForm.dueDate || undefined,
-      priority: taskForm.priority || 'medium',
-      category: taskForm.category || 'general',
-    };
-
-    api.post('/todos', newTask, apiConfig)
-      .then(res => {
-        setTasks(prev => [...prev, res.data.data.todo]);
-        setTaskForm({ title: '', description: '', dueDate: '', priority: 'medium', category: '' });
-        setShowTaskModal(false);
-        showNotification('Task added successfully!');
-      })
-      .catch(err => {
-        const msg = err?.response?.data?.message || 'Error adding task';
-        showNotification(msg, 'error');
-      });
-  };
-
-  const updateTask = () => {
-    if (!editingTask) return;
-    api.put(`/todos/${editingTask.id}`, taskForm, apiConfig)
-      .then(res => {
-        const updatedTask = res.data.data.todo;
-        setTasks(prev => prev.map(task =>
-          task.id === updatedTask._id || task.id === updatedTask.id ? { ...task, ...updatedTask, id: updatedTask._id || updatedTask.id } : task
-        ));
-        setEditingTask(null);
-        setShowTaskModal(false);
-        showNotification('Task updated successfully!');
-      })
-      .catch(err => {
-        const msg = err?.response?.data?.message || 'Error updating task';
-        showNotification(msg, 'error');
-      });
-  };
-
-  const toggleTaskComplete = (taskId) => {
-    api.patch(`/todos/${taskId}/toggle`, {}, apiConfig)
-      .then(res => {
-        const updatedTask = res.data.data.todo;
-        setTasks(prev => prev.map(task =>
-          task.id === updatedTask._id || task.id === updatedTask.id ? { ...task, ...updatedTask, id: updatedTask._id || updatedTask.id } : task
-        ));
-        showNotification(`Task status updated!`);
-      })
-      .catch(err => {
-        showNotification('Error toggling task', 'error');
-      });
-  };
-
-  const deleteTask = (taskId) => {
-    api.delete(`/todos/${taskId}`, apiConfig)
-      .then(() => {
-        setTasks(prev => prev.filter(task => task.id !== taskId));
-        showNotification('Task deleted successfully!');
-      })
-      .catch(err => {
-        showNotification('Error deleting task', 'error');
-      });
-  };
-
-  const tailwindToHex = (tw) => {
-    const map = {
-      'bg-blue-500': '#3b82f6',
-      'bg-purple-500': '#a21caf',
-      'bg-green-500': '#22c55e',
-      'bg-orange-500': '#f97316',
-      'bg-red-500': '#ef4444',
-      'bg-pink-500': '#ec4899',
-      'bg-indigo-500': '#6366f1',
-      'bg-yellow-500': '#eab308'
-    };
-    return map[tw] || '#3b82f6';
-  };
-
-  const addCategory = () => {
-    if (!categoryForm.name.trim()) {
-      showNotification('Please enter a category name', 'error');
-      return;
-    }
-
-    api.post('/categories', {
-      name: categoryForm.name.trim(),
-      color: tailwindToHex(categoryForm.color)
-    }, apiConfig)
-      .then(res => {
-        const cat = res.data.data.category;
-        setCategories(prev => ([
-          ...prev,
-          { ...cat, id: cat._id || cat.id, count: 0 }
-        ]));
-        setCategoryForm({ name: '', color: 'bg-blue-500' });
-        setShowCategoryModal(false);
-        showNotification('Category added successfully!');
-      })
-      .catch(err => {
-        showNotification('Error adding category', 'error');
-      });
-  };
-
-  const deleteCategory = async (categoryId) => {
-    if (categoryId.startsWith('default-')) {
-      showNotification('Cannot delete default categories', 'error');
-      return;
-    }
-
-    try {
-      await api.delete(`/categories/${categoryId}`, apiConfig);
-      setCategories(prev => prev.filter(cat => cat.id !== categoryId));
-      showNotification('Category deleted successfully!');
-    } catch (err) {
-      showNotification('Error deleting category', 'error');
+  // Translation Map for Language Switching
+  const content = {
+    en: {
+      tagline: 'Find Work. Grow Your Life.',
+      dashboard: 'Dashboard',
+      findJobs: 'Find Jobs',
+      remoteWork: 'Remote Work',
+      freelance: 'Freelance Market',
+      myCv: 'My CV & Profile',
+      careerPlanner: 'Career Planner',
+      hiring: 'Hiring & Recruiters',
+      trustedSites: 'Trusted Sites',
+      premiumBtn: '👑 Premium Experience',
+      placeholder: 'Search jobs worldwide (Speak/type)...',
+      welcome: 'WELCOME, ALAMIN',
+      bannerBadge: 'Welcome Workspace',
+      bannerHeading: 'Your Dream Job is Just a',
+      bannerHighlight: 'Click Away!',
+      platformTitle: 'Trusted Global Job Platforms:',
+      ecosystemTitle: 'Explore TaskFlow Ecosystem',
+      allServices: 'All Services',
+      openModule: 'Open Module',
+      footerWarning: 'External job links — verify each vacancy before applying',
+      footerSlogan: 'A Smarter Way to Find Work',
+      speechErr: 'Could not understand. Please try again.'
+    },
+    bn: {
+      tagline: 'কাজ খুঁজুন। জীবনকে গড়ুন।',
+      dashboard: 'ড্যাশবোর্ড',
+      findJobs: 'চাকরি খুঁজুন',
+      remoteWork: 'রিমোট ওয়ার্ক',
+      freelance: 'ফ্রিল্যান্স মার্কেট',
+      myCv: 'আমার সিভি ও প্রোফাইল',
+      careerPlanner: 'ক্যারিয়ার প্ল্যানার',
+      hiring: 'নিয়োগ ও রিক্রুটার',
+      trustedSites: 'বিশ্বস্ত সাইটসমূহ',
+      premiumBtn: '👑 প্রিমিয়াম অভিজ্ঞতা',
+      placeholder: 'বিশ্বব্যাপী চাকরি খুঁজুন (বলুন বা লিখুন)...',
+      welcome: 'স্বাগতম, আলামিন',
+      bannerBadge: 'ওয়েলকাম ওয়ার্কস্পেস',
+      bannerHeading: 'আপনার স্বপ্নের চাকরি মাত্র একটি',
+      bannerHighlight: 'ক্লিকের দূরত্বে!',
+      platformTitle: 'বিশ্বস্ত বৈশ্বিক চাকরি প্ল্যাটফর্ম:',
+      ecosystemTitle: 'টাস্কফ্লো ইকোসিস্টেম অন্বেষণ করুন',
+      allServices: 'সব সেবা সমূহ',
+      openModule: 'মডিউল ওপেন করুন',
+      footerWarning: 'বাহ্যিক চাকরির লিঙ্ক — আবেদন করার আগে প্রতিটি শূন্যপদ যাচাই করুন',
+      footerSlogan: 'কাজ খোঁজার একটি স্মার্ট উপায়',
+      speechErr: 'বুঝতে পারিনি। অনুগ্রহ করে আবার চেষ্টা করুন।'
     }
   };
 
-  const colorOptions = [
-    'bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500',
-    'bg-red-500', 'bg-pink-500', 'bg-indigo-500', 'bg-yellow-500'
+  // 15 Ecosystem Core Modules (Dynamic Translations)
+  const services = [
+    { id: 1, title: lang === 'bn' ? 'বিশ্বব্যাপী চাকরি খুঁজুন' : 'Find Jobs Worldwide', icon: '🌐', description: lang === 'bn' ? 'গ্লোবাল সুযোগ অন্বেষণ করুন' : 'Explore global opportunities', bg: 'from-blue-600 to-cyan-500', link: '/find-jobs' },
+    { id: 2, title: lang === 'bn' ? 'অনলাইন রিমোট ওয়ার্ক' : 'Remote Work Online', icon: '💻', description: lang === 'bn' ? 'যেকোনো জায়গা থেকে কাজ করুন' : 'Work from anywhere', bg: 'from-indigo-600 to-purple-500', link: '/remote-work' },
+    { id: 3, title: lang === 'bn' ? 'ফ্রিল্যান্স মার্কেটপ্লেস' : 'Freelance Marketplace', icon: '🤝', description: lang === 'bn' ? 'আপনার দক্ষতা বিক্রি করুন' : 'Sell your expert skills', bg: 'from-emerald-600 to-teal-500', link: '/freelance' },
+    { id: 4, title: lang === 'bn' ? 'সিভি ও রেজুমি তৈরি' : 'Create CV & Resume', icon: '📝', description: lang === 'bn' ? 'প্রফেশনাল প্রোফাইল গড়ুন' : 'Build your professional profile', bg: 'from-amber-500 to-orange-500', link: '/create-cv' },
+    { id: 5, title: lang === 'bn' ? 'এআই ক্যারিয়ার অ্যাসিস্ট্যান্ট' : 'AI Career Assistant', icon: '🧠', description: lang === 'bn' ? 'স্মার্ট চ্যাট ও টাস্ক সেটআপ' : 'Smart chat & task setup', bg: 'from-pink-600 to-rose-500', link: '/ai-assistant' },
+    { id: 6, title: lang === 'bn' ? 'নিয়োগ ও নিয়োগকর্তা' : 'Hiring & Recruitment', icon: '👥', description: lang === 'bn' ? 'সঠিক ট্যালেন্ট খুঁজে নিন' : 'Find the right talent', bg: 'from-violet-600 to-fuchsia-500', link: '/hiring' },
+    { id: 7, title: lang === 'bn' ? 'ক্যারিয়ার গ্রোথ প্ল্যানার' : 'Career Growth Planner', icon: '📊', description: lang === 'bn' ? 'ধাপে ধাপে লক্ষ্যে পৌঁছান' : 'Reach your goals step-by-step', bg: 'from-cyan-600 to-blue-500', link: '/career-growth' },
+    { id: 8, title: lang === 'bn' ? 'যাচাইকৃত চাকরি ওয়েবসাইট' : 'Verified Job Websites', icon: '🛡️', description: lang === 'bn' ? 'নিরাপদ ও বিশ্বস্ত লিঙ্ক' : 'Safe & trusted career links', bg: 'from-teal-600 to-emerald-500', link: '/verified-sites' },
+    { id: 9, title: lang === 'bn' ? 'পিন্টারেস্ট ইন্সপিরেশন গ্যালারি' : 'Pinterest Inspiration Gallery', icon: '🖼️', description: lang === 'bn' ? 'ডিজাইন ও কাজ আবিষ্কার' : 'Visual design & work discovery', bg: 'from-purple-600 to-pink-500', link: '/inspiration-gallery' },
+    { id: 10, title: lang === 'bn' ? 'এআই ইমেজ ও ব্যানার ক্রিয়েটর' : 'AI Image & Banner Creator', icon: '🎨', description: lang === 'bn' ? 'হাই-কোয়ালিটি ভিজ্যুয়াল তৈরি' : 'Generate high-quality visuals', bg: 'from-sky-500 to-blue-600', link: '/ai-banner-creator' },
+    { id: 11, title: lang === 'bn' ? 'লোগো মেকার' : 'Logo Maker', icon: '🏷️', description: lang === 'bn' ? 'ডাইনামিক সার্ভিস লোগো' : 'Create dynamic service logos', bg: 'from-orange-600 to-red-500', link: '/logo-maker' },
+    { id: 12, title: lang === 'bn' ? 'অনলাইন স্কিল ও লার্নিং' : 'Online Skills & Learning', icon: '🎓', description: lang === 'bn' ? 'জ্ঞান ও দক্ষতা বৃদ্ধি করুন' : 'Upgrade your knowledge pool', bg: 'from-indigo-500 to-blue-700', link: '/skills-learning' },
+    { id: 13, title: lang === 'bn' ? 'আমার আবেদনসমূহ' : 'My Applications', icon: '📂', description: lang === 'bn' ? 'আবেদনের স্ট্যাটাস ট্র্যাক করুন' : 'Track submitted job responses', bg: 'from-slate-600 to-slate-800', link: '/my-applications' },
+    { id: 14, title: lang === 'bn' ? 'সংরক্ষিত চাকরি' : 'My Saved Jobs', icon: '🔖', description: lang === 'bn' ? 'পছন্দের তালিকায় দ্রুত অ্যাক্সেস' : 'Quick access to curated listings', bg: 'from-yellow-600 to-amber-500', link: '/saved-jobs' },
+    { id: 15, title: lang === 'bn' ? 'আমার প্রোফাইল ও পোর্টফোলিও' : 'My Profile & Portfolio', icon: '👤', description: lang === 'bn' ? 'অ্যাকাউন্ট ও রেজুমি পরিচালনা' : 'Manage accounts & resumes', bg: 'from-zinc-700 to-neutral-900', link: '/profile-portfolio' }
   ];
 
-  const priorityColors = {
-    low: 'bg-green-100 text-green-800 border-green-200',
-    medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    high: 'bg-red-100 text-red-800 border-red-200'
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    window.location.href = `/find-jobs?query=${encodeURIComponent(searchQuery)}&category=${selectedCategory}&lang=${lang}`;
   };
 
-  const getStats = () => {
-    const total = tasks.length;
-    const completed = tasks.filter(t => t.completed && !t.archived).length;
-    const overdue = tasks.filter(t => !t.completed && !t.archived && t.dueDate && new Date(t.dueDate) < new Date()).length;
-    const archived = tasks.filter(t => t.archived).length;
-    return { total, completed, overdue, archived };
+  const handleGlobalVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Your browser does not support speech recognition. Please use Google Chrome.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = lang === 'bn' ? 'bn-BD' : 'en-US';
+
+    if (!isListening) {
+      recognition.start();
+      setIsListening(true);
+      setSpeechError('');
+    } else {
+      recognition.stop();
+      setIsListening(false);
+    }
+
+    recognition.onresult = (event) => {
+      setSearchQuery(event.results.transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = () => {
+      setSpeechError(content[lang].speechErr);
+      setIsListening(false);
+    };
   };
-  const stats = getStats();
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed top-2 left-4 z-50 p-3 bg-blue-600 rounded-xl shadow-xl hover:bg-blue-700 focus:outline-none md:hidden"
-      >
-        <Menu size={24} className="text-white" />
-      </button>
-
-      <div className="flex flex-col md:flex-row min-h-screen">
-        <div className={`
-          fixed inset-y-0 left-0 z-40 w-72 transform transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          bg-gray-900/95 backdrop-blur-xl border-r border-gray-800 shadow-2xl
-          md:static md:translate-x-0 md:w-72
-        `}>
-          <div className="h-full flex flex-col overflow-y-auto">
-            <div className="px-6 py-6 border-b border-gray-800">
-              <div className="flex items-center justify-between">
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="p-2 rounded-xl text-gray-400 hover:text-white md:hidden"
-                >
-                  <X size={22} />
-                </button>
-              </div>
-              <div className="mt-6 flex items-center gap-3 p-4 bg-blue-600/20 rounded-xl border border-blue-700/30">
-                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                  <User size={20} className="text-white" />
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-white">{user?.name || 'User'}</p>
-                  <p className="text-xs text-gray-300">Welcome back!</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="px-4 py-6 space-y-3">
-              <button
-                onClick={() => { setCurrentView('dashboard'); setSidebarOpen(false); }}
-                className={`w-full text-left px-4 py-3 rounded-xl text-base font-semibold transition-all flex items-center gap-3 ${currentView === 'dashboard' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-800 text-gray-300'}`}
-              >
-                <Home size={18} /> Dashboard
-              </button>
-              <button
-                onClick={() => { setCurrentView('tasks'); setSidebarOpen(false); }}
-                className={`w-full text-left px-4 py-3 rounded-xl text-base font-semibold transition-all flex items-center gap-3 ${currentView === 'tasks' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-800 text-gray-300'}`}
-              >
-                <CheckSquare size={18} /> Tasks
-              </button>
-              <button
-                onClick={() => { setCurrentView('categories'); setSidebarOpen(false); }}
-                className={`w-full text-left px-4 py-3 rounded-xl text-base font-semibold transition-all flex items-center gap-3 ${currentView === 'categories' ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-gray-800 text-gray-300'}`}
-              >
-                <Folder size={18} /> Categories
-              </button>
-            </div>
-
-            <div className="px-4 py-6 border-t border-gray-800 mt-auto">
-              <button
-                onClick={() => openCategoryModal()}
-                className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all text-sm font-semibold shadow-lg"
-              >
-                <Plus size={16} className="mr-2" /> Add Category
-              </button>
-            </div>
+    <div className="flex h-screen bg-[#030712] text-white font-sans overflow-hidden">
+      
+      {/* 1. Large Screen Sidebar Layout (Hidden on Mobile Devices) */}
+      <div className="hidden lg:flex flex-col w-64 bg-[#090f24] border-r border-[#1e293b]/40 flex-shrink-0">
+        <div className="p-5 flex items-center space-x-3 border-b border-[#1e293b]/40">
+          <img 
+            src="https://ibb.co" 
+            alt="TaskFlow AI" 
+            className="w-10 h-10 object-contain rounded-lg border border-[#22c55e]/20"
+          />
+          <div className="flex flex-col">
+            <span className="text-lg font-black tracking-wider text-white">TaskFlow <span className="text-[#22c55e]">AI</span></span>
+            <span className="text-[10px] text-slate-400 tracking-tight font-medium">{content[lang].tagline}</span>
           </div>
         </div>
 
-        {sidebarOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-30" onClick={() => setSidebarOpen(false)}></div>
-        )}
-
-        <div className="flex-1 min-h-screen bg-black p-6 pt-20">
-          {currentView === 'dashboard' && (
-            <div>
-              <div className="mb-8">
-                <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-                <p className="text-gray-400">Welcome back! Here's your productivity overview.</p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-blue-600/20 p-6 rounded-2xl border border-blue-700/30">
-                  <p className="text-sm text-gray-300">Total Tasks</p>
-                  <p className="text-3xl font-bold">{stats.total}</p>
-                </div>
-                <div className="bg-green-600/20 p-6 rounded-2xl border border-green-700/30">
-                  <p className="text-sm text-gray-300">Completed</p>
-                  <p className="text-3xl font-bold">{stats.completed}</p>
-                </div>
-                <div className="bg-red-600/20 p-6 rounded-2xl border border-red-700/30">
-                  <p className="text-sm text-gray-300">Overdue</p>
-                  <p className="text-3xl font-bold">{stats.overdue}</p>
-                </div>
-                <div className="bg-purple-600/20 p-6 rounded-2xl border border-purple-700/30">
-                  <p className="text-sm text-gray-300">Archived</p>
-                  <p className="text-3xl font-bold">{stats.archived}</p>
-                </div>
-              </div>
-
-              {/* Recent Tasks */}
-              <div className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6">
-                <h2 className="text-xl font-semibold mb-4">Recent Tasks</h2>
-                <div className="space-y-3">
-                  {tasks.slice(0, 5).map(task => (
-                    <div key={task.id} className="p-3 bg-gray-900 border border-gray-800 rounded-xl flex justify-between items-center cursor-pointer" onClick={() => openTaskDetailsModal(task)}>
-                      <span className={task.completed ? 'line-through text-gray-500' : 'text-white'}>{task.title}</span>
-                      <button onClick={(e) => { e.stopPropagation(); toggleTaskComplete(task.id); }} className="text-xs px-2.5 py-1 bg-blue-600/20 border border-blue-700/30 text-blue-400 rounded-lg">
-                        {task.completed ? 'Completed' : 'Mark Done'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {currentView === 'tasks' && (
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Tasks List</h2>
-                <div className="flex gap-3">
-                  <div className="flex bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-                    <button onClick={() => setViewMode('list')} className={`px-3 py-2 ${viewMode === 'list' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}><List size={16} /></button>
-                    <button onClick={() => setViewMode('kanban')} className={`px-3 py-2 ${viewMode === 'kanban' ? 'bg-blue-600 text-white' : 'text-gray-400'}`}><Grid size={16} /></button>
-                  </div>
-                  <button onClick={() => openTaskModal()} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 font-medium">
-                    <Plus size={16} /> Add Task
-                  </button>
-                </div>
-              </div>
-
-              {viewMode === 'list' ? (
-                <div className="space-y-4">
-                  {filteredTasks.map(task => (
-                    <div key={task.id} className="p-4 bg-gray-900 border border-gray-800 rounded-xl flex justify-between items-center cursor-pointer hover:border-blue-600/50 transition-all" onClick={() => openTaskDetailsModal(task)}>
-                      <div>
-                        <h3 className={`font-semibold ${task.completed ? 'line-through text-gray-500' : 'text-white'}`}>{task.title}</h3>
-                        <p className="text-sm text-gray-400">{task.description || 'No description'}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button onClick={(e) => { e.stopPropagation(); openTaskModal(task); }} className="p-2 text-gray-400 hover:text-blue-400"><Edit size={16} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); deleteTask(task.id); }} className="p-2 text-gray-400 hover:text-red-400"><Trash2 size={16} /></button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {['todo', 'in-progress', 'done'].map(status => (
-                    <div key={status} className="bg-gray-900/50 border border-gray-800 rounded-2xl p-4 min-h-[350px]">
-                      <h3 className="font-semibold capitalize mb-4 text-blue-400">{status.replace('-', ' ')}</h3>
-                      <div className="space-y-3">
-                        {filteredTasks.filter(t => status === 'done' ? t.completed : !t.completed).map(task => (
-                          <div key={task.id} className="p-3 bg-gray-900 border border-gray-800 rounded-xl cursor-pointer" onClick={() => openTaskDetailsModal(task)}>
-                            <p className="font-medium text-sm text-white">{task.title}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {currentView === 'categories' && (
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Categories</h2>
-                <button onClick={() => openCategoryModal()} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-2 font-medium">
-                  <Plus size={16} /> Add Category
-                </button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categories.map(cat => (
-                  <div key={cat.id} className="p-4 bg-gray-900 border border-gray-800 rounded-xl flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full ${cat.color || 'bg-blue-500'}`} />
-                      <span className="font-semibold text-white">{cat.name}</span>
-                    </div>
-                    <button onClick={() => deleteCategory(cat.id)} className="text-red-400 hover:text-red-300">
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+          <button className="w-full flex items-center space-x-3 bg-[#22c55e] text-black font-bold px-4 py-2.5 rounded-xl shadow-md">
+            <span>🏠</span> <span>{content[lang].dashboard}</span>
+          </button>
+          {['findJobs', 'remoteWork', 'freelance', 'myCv', 'careerPlanner', 'hiring', 'trustedSites'].map((item, idx) => (
+            <a key={idx} href={`/${item}`} className="w-full flex items-center space-x-3 text-slate-300 hover:bg-slate-800/50 hover:text-white px-4 py-2.5 rounded-xl font-medium transition-all">
+              <span>➔</span> <span>{content[lang][item]}</span>
+            </a>
+          ))}
+        </nav>
       </div>
 
-      {/* Task Modal */}
-      {showTaskModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">{editingTask ? 'Edit Task' : 'New Task'}</h3>
-              <button onClick={() => setShowTaskModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
-            </div>
-            <div className="space-y-4">
+      {/* 2. Main Body Content (Highly Responsive on Mobile Phones) */}
+      <div className="flex-1 flex flex-col h-full overflow-y-auto bg-[#030712] pb-16 lg:pb-0">
+        
+        {/* Top Control Header with Capsule Search Bar and Custom Language Switcher */}
+        <div className="px-4 py-3 bg-[#090f24]/80 backdrop-blur-md border-b border-[#1e293b]/40 flex flex-col sm:flex-row items-center justify-between gap-3 sticky top-0 z-50 w-full">
+          
+          {/* Mobile and Global Search Field */}
+          <div className="w-full sm:flex-1 max-w-xl flex flex-col space-y-1">
+            <form onSubmit={handleSearchSubmit} className="bg-[#0f172a] border border-[#1e293b] rounded-full px-4 py-1 flex items-center space-x-2 focus-within:border-[#22c55e] transition-all">
+              <span className="text-slate-400 text-xs">🔍</span>
               <input
                 type="text"
-                placeholder="Task Title"
-                value={taskForm.title}
-                onChange={e => setTaskForm({ ...taskForm, title: e.target.value })}
-                className="w-full p-3 bg-gray-950 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
-              />
-              <textarea
-                placeholder="Description"
-                value={taskForm.description}
-                onChange={e => setTaskForm({ ...taskForm, description: e.target.value })}
-                className="w-full p-3 bg-gray-950 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-blue-500 resize-none h-24"
-              />
-              <button
-                onClick={editingTask ? updateTask : addTask}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
-              >
-                {editingTask ? 'Update Task' : 'Add Task'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Category Modal */}
-      {showCategoryModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">New Category</h3>
-              <button onClick={() => setShowCategoryModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
-            </div>
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Category Name"
-                value={categoryForm.name}
-                onChange={e => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                className="w-full p-3 bg-gray-950 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-blue-500"
-              />
-              <button
-                onClick={addCategory}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
-              >
-                Add Category
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Task Details Modal */}
-      {showTaskDetailsModal && selectedTask && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">Task Details</h3>
-              <button onClick={() => setShowTaskDetailsModal(false)} className="text-gray-400 hover:text-white"><X size={20} /></button>
-            </div>
-            <div className="space-y-3 text-gray-300">
-              <p><strong className="text-white">Title:</strong> {selectedTask.title}</p>
-              <p><strong className="text-white">Description:</strong> {selectedTask.description || 'None'}</p>
-              <p><strong className="text-white">Status:</strong> {selectedTask.completed ? 'Completed' : 'Pending'}</p>
-            </div>
-            <button onClick={() => setShowTaskDetailsModal(false)} className="w-full mt-6 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-xl">Close</button>
-          </div>
-        </div>
-      )}
-
-      {/* Notifications */}
-      <div className="fixed top-4 right-4 z-50 space-y-2">
-        {notifications.map(n => (
-          <div key={n.id} className={`p-3 rounded-xl text-white shadow-lg ${n.type === 'error' ? 'bg-red-600' : 'bg-green-600'}`}>
-            {n.message}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export default Dashboard;
+                value={searchQuery}
