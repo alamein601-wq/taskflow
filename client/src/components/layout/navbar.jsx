@@ -53,12 +53,19 @@ export default function Navbar() {
               className="flex items-center focus:outline-none group transition-all duration-300 hover:scale-105"
               aria-label="Go to home"
             >
-              <div className="relative">
-                <CheckSquare className="text-blue-500 mr-3 transition-all duration-300 group-hover:text-blue-400 w-7 h-7" size={28} />
-                <div className="absolute inset-0 bg-blue-500/20 rounded-lg blur-xl group-hover:bg-blue-500/30 transition-all duration-300"></div>
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-[#22c55e] to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 overflow-hidden border border-emerald-500/30 mr-3">
+                <img 
+                  src="https://i.ibb.co/68zW895/logo.png" 
+                  alt="TaskFlow AI Logo" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.currentTarget.parentElement.innerText = '⚡';
+                  }}
+                />
               </div>
-              <span className="text-2xl font-bold cursor-pointer bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover:from-blue-400 group-hover:to-blue-300 transition-all duration-300 truncate">
-                TaskFlow
+              <span className="text-xl sm:text-2xl font-bold cursor-pointer bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover:from-blue-400 group-hover:to-blue-300 transition-all duration-300 truncate">
+                TaskFlow AI
               </span>
             </button>
           </div>
@@ -70,12 +77,19 @@ export default function Navbar() {
               className="flex items-center focus:outline-none group transition-all duration-300 hover:scale-105"
               aria-label="Go to home"
             >
-              <div className="relative">
-                <CheckSquare className="text-blue-500 mr-2 transition-all duration-300 group-hover:text-blue-400" size={24} />
-                <div className="absolute inset-0 bg-blue-500/20 rounded-lg blur-xl group-hover:bg-blue-500/30 transition-all duration-300"></div>
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#22c55e] to-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 overflow-hidden border border-emerald-500/30 mr-2">
+                <img 
+                  src="https://i.ibb.co/68zW895/logo.png" 
+                  alt="TaskFlow AI Logo" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.currentTarget.parentElement.innerText = '⚡';
+                  }}
+                />
               </div>
-              <span className="text-lg font-bold cursor-pointer bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover:from-blue-400 group-hover:to-blue-300 transition-all duration-300 truncate">
-                TaskFlow
+              <span className="text-base sm:text-lg font-bold cursor-pointer bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent group-hover:from-blue-400 group-hover:to-blue-300 transition-all duration-300 truncate">
+                TaskFlow AI
               </span>
             </button>
           </div>
@@ -84,17 +98,17 @@ export default function Navbar() {
           <div className="flex items-center space-x-2 sm:space-x-4">
             {loggedIn && user ? (
               <DropdownMenu>
-                                 <DropdownMenuTrigger asChild>
-                   <button
-                     type="button"
-                     className="relative w-8 h-8 sm:w-10 sm:h-10 cursor-pointer bg-blue-600 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold text-white transition-all duration-300 hover:scale-110 hover:bg-blue-700 focus:scale-110 focus:ring-4 focus:ring-blue-500/30 shadow-lg hover:shadow-xl"
-                     style={{ zIndex: 60 }}
-                     aria-label="Open profile menu"
-                   >
-                     <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-xl"></div>
-                     <span className="relative z-10">{profileInitials}</span>
-                   </button>
-                 </DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="relative w-8 h-8 sm:w-10 sm:h-10 cursor-pointer bg-blue-600 rounded-full flex items-center justify-center text-xs sm:text-sm font-semibold text-white transition-all duration-300 hover:scale-110 hover:bg-blue-700 focus:scale-110 focus:ring-4 focus:ring-blue-500/30 shadow-lg hover:shadow-xl"
+                    style={{ zIndex: 60 }}
+                    aria-label="Open profile menu"
+                  >
+                    <div className="absolute inset-0 bg-blue-500/30 rounded-full blur-xl"></div>
+                    <span className="relative z-10">{profileInitials}</span>
+                  </button>
+                </DropdownMenuTrigger>
                 <DropdownMenuContent 
                   className="w-64 bg-gray-900/95 backdrop-blur-xl border border-gray-800/50 text-white shadow-2xl rounded-2xl" 
                   align="end" 
@@ -132,23 +146,23 @@ export default function Navbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-                         ) : (
-               <div className="flex items-center gap-2 sm:gap-3">
-                 <Button 
-                   variant="ghost" 
-                   onClick={() => navigate('/login')} 
-                   className="text-gray-300 hover:text-white hover:bg-gray-800/50 px-3 sm:px-6 py-2 rounded-xl transition-all duration-300 font-medium text-sm sm:text-base"
-                 >
-                   Sign In
-                 </Button>
-                 <Button 
-                   onClick={() => navigate('/signup')} 
-                   className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold hover:scale-105 text-sm sm:text-base"
-                 >
-                   Get Started
-                 </Button>
-               </div>
-             )}
+            ) : (
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => navigate('/login')} 
+                  className="text-gray-300 hover:text-white hover:bg-gray-800/50 px-3 sm:px-6 py-2 rounded-xl transition-all duration-300 font-medium text-sm sm:text-base"
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  onClick={() => navigate('/signup')} 
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold hover:scale-105 text-sm sm:text-base"
+                >
+                  Get Started
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
