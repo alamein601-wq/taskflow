@@ -12,14 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import API from "@/lib/api";
 
 export function LoginForm({ className, ...props }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -28,20 +28,30 @@ export function LoginForm({ className, ...props }) {
     setIsLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      navigate("/dashboard");
-    } catch (err) {
-      const errors = {
-        "auth/invalid-credential": "ইমেইল অথবা পাসওয়ার্ড ভুল।",
-        "auth/user-not-found": "এই ইমেইলে অ্যাকাউন্ট নেই।",
-        "auth/wrong-password": "পাসওয়ার্ড ভুল।",
-        "auth/invalid-email": "সঠিক ইমেইল দিন।",
-        "auth/too-many-requests": "পরে আবার চেষ্টা করুন।",
-        "auth/network-request-failed": "ইন্টারনেট সংযোগ পরীক্ষা করুন।",
-        "auth/operation-not-allowed": "Firebase Email/Password চালু করুন।",
-      };
+      const response = await API.post("/auth/login", {
+        email: email.trim().toLowerCase(),
+        password
+      });
 
-      setError(errors[err.code] || "লগইন হয়নি। Firebase সেটিংস পরীক্ষা করুন।");
+      const { token, user } = response.data.data || {};
+
+      if (!token || !user) {
+        throw new Error("Invalid login response");
+      }
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      navigate("/dashboard", { replace: true });
+
+    } catch (err) {
+      console.error("Login failed:", err.response?.status);
+
+      setError(
+        err.response?.data?.message ||
+        "লগইন করা যায়নি। ইমেইল, পাসওয়ার্ড ও সার্ভার পরীক্ষা করুন।"
+      );
+
     } finally {
       setIsLoading(false);
     }
@@ -62,6 +72,7 @@ export function LoginForm({ className, ...props }) {
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
+
               {error && (
                 <div className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg text-center">
                   {error}
