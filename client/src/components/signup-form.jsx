@@ -12,68 +12,59 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import API from "@/lib/api";
 
 export function SignupForm({ className, ...props }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const submitHandle = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
-    if (!name || !email || !password) {
-      setError("দয়া করে সব ঘরগুলো পূরণ করুন।");
+    if (name.trim().length < 2) {
+      setError("নাম অন্তত ২ অক্ষরের হতে হবে।");
       return;
     }
 
-    if (password.length < 6) {
-      setError("পাসওয়ার্ড অন্তত ৬ অক্ষরের হতে হবে।");
+    if (password.length < 8) {
+      setError("পাসওয়ার্ড অন্তত ৮ অক্ষরের হতে হবে।");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // ১. ফায়ারবেসে ইউজার তৈরি
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
+      const response = await API.post("/auth/register", {
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
         password
-      );
-
-      // ২. ইউজারের ডিসপ্লে নেম (Name) সেট করা
-      await updateProfile(userCredential.user, {
-        displayName: name.trim(),
       });
 
-      // ৩. ব্যাকআপ হিসেবে লোকাল স্টোরেজেও রাখতে পারেন
-      const userData = { name: name.trim(), email: email.trim() };
-      localStorage.setItem("taskflow_current_user", JSON.stringify(userData));
+      const { token, user } = response.data.data || {};
 
-      setSuccess("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...");
+      if (!token || !user) {
+        throw new Error("Invalid registration response");
+      }
 
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      navigate("/dashboard", { replace: true });
+
     } catch (err) {
-      const errors = {
-        "auth/email-already-in-use": "এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট খোলা হয়েছে।",
-        "auth/invalid-email": "সঠিক ইমেইল ঠিকানা দিন।",
-        "auth/weak-password": "পাসওয়ার্ডটি দুর্বল, অন্তত ৬ অক্ষরের দিন।",
-        "auth/network-request-failed": "ইন্টারনেট সংযোগ পরীক্ষা করুন।",
-      };
+      console.error("Signup failed:", err.response?.status);
 
       setError(
-        errors[err.code] || "অ্যাকাউন্ট তৈরি হয়নি। ফায়ারবেস সেটিং চেক করুন।"
+        err.response?.data?.message ||
+        "অ্যাকাউন্ট তৈরি হয়নি। আবার চেষ্টা করুন।"
       );
+
     } finally {
       setIsLoading(false);
     }
@@ -84,23 +75,20 @@ export function SignupForm({ className, ...props }) {
       <Card className="bg-slate-900 border-slate-800 text-white">
         <CardHeader>
           <CardTitle className="text-2xl text-blue-500">
-            Taskflow AI অ্যাকাউন্ট তৈরি করুন
+            TaskFlow AI অ্যাকাউন্ট তৈরি করুন
           </CardTitle>
           <CardDescription className="text-slate-400">
             টাস্ক অর্গানাইজ করা শুরু করতে আপনার তথ্য দিন
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={submitHandle}>
             <div className="flex flex-col gap-6">
+
               {error && (
                 <div className="p-3 text-sm text-red-400 bg-red-950/50 border border-red-800 rounded-lg text-center">
                   {error}
-                </div>
-              )}
-              {success && (
-                <div className="p-3 text-sm text-emerald-400 bg-emerald-950/50 border border-emerald-800 rounded-lg text-center">
-                  {success}
                 </div>
               )}
 
@@ -111,11 +99,11 @@ export function SignupForm({ className, ...props }) {
                 <Input
                   id="name"
                   type="text"
-                  placeholder="আপনার নাম"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="bg-slate-950 border-slate-700 text-white"
                   autoComplete="name"
+                  maxLength={80}
                   required
                 />
               </div>
@@ -127,7 +115,6 @@ export function SignupForm({ className, ...props }) {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="bg-slate-950 border-slate-700 text-white"
@@ -147,6 +134,7 @@ export function SignupForm({ className, ...props }) {
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-slate-950 border-slate-700 text-white"
                   autoComplete="new-password"
+                  minLength={8}
                   required
                 />
               </div>
