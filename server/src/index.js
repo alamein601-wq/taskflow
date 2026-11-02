@@ -1,3 +1,4 @@
+
 import { connectDB } from "./db/index.js";
 import { app } from "./app.js";
 
@@ -17,11 +18,11 @@ const handler = async (req, res) => {
     return app(req, res);
 
   } catch (error) {
-    console.error("Backend Error:", error.message);
+    console.error("Backend Error:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Database connection failed"
+      message: "Server or database connection failed"
     });
   }
 };
