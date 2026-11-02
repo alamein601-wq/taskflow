@@ -1,3 +1,4 @@
+
 import mongoose from "mongoose";
 
 let cached = global.mongoose;
@@ -14,9 +15,14 @@ export const connectDB = async () => {
     return cached.conn;
   }
 
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI is missing");
+  }
+
   if (!cached.promise) {
     cached.promise = mongoose.connect(process.env.MONGODB_URI, {
-      bufferCommands: false
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 10000
     });
   }
 
@@ -26,6 +32,7 @@ export const connectDB = async () => {
     return cached.conn;
   } catch (error) {
     cached.promise = null;
+    cached.conn = null;
     throw error;
   }
 };
