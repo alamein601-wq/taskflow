@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "@/lib/api";
 
-export function SignupForm({ className, ...props }) {
+export function SignupPage({ className, ...props }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -163,3 +163,6 @@ export function SignupForm({ className, ...props }) {
     </div>
   );
 }
+
+export default SignupPage;
+
