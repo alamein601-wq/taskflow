@@ -1,16 +1,16 @@
-import React from 'react';
-import LoginForm from '../components/login-form'; // ফোল্ডার এবং ফাইলের নাম হুবহু ছোট হাতের (বা আপনার সঠিক নাম অনুযায়ী) মিল রেখে দিন
+import React, { useState } from "react";
+import { SignupForm } from "@/components/signup-form"; // আপনার সঠিক পাথ অনুযায়ী
 
-export function LoginPage() {
+export function SignupPage() {
   return (
     <div className="relative flex min-h-screen flex-col bg-black">
       <main className="flex-1 flex items-center justify-center py-12 px-4 bg-black">
         <div className="w-full max-w-md">
-          <LoginForm />
+          <SignupForm />
         </div>
       </main>
     </div>
   );
 }
 
-export default LoginPage;
+export default SignupPage; // <--- এই ডিফল্ট এক্সপোর্টটি থাকা বাধ্যতামূলক
