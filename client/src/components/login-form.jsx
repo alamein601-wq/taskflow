@@ -1,6 +1,8 @@
+// client/src/components/login-form.jsx ফাইলে সম্পূর্ণ সঠিক কোড
+
 import React, { useState } from "react";
 
-export function LoginForm() {
+export function LoginForm() { // <--- নিশ্চিত করুন এই নাম ঠিক আছে
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -53,4 +55,4 @@ export function LoginForm() {
   );
 }
 
-export default LoginForm;
+export default LoginForm; // <--- নিশ্চিত করুন এটি Default Export হিসেবে আছে
