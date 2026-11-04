@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +13,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "@/lib/api";
 
-export function SignupPage({ className, ...props }) {
+export function SignupForm({ className, ...props }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -164,5 +163,4 @@ export function SignupPage({ className, ...props }) {
   );
 }
 
-export default SignupPage;
-
+export default SignupForm;
