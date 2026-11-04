@@ -1,15 +1,11 @@
-import { LoginForm } from '../components/login-form';
+import React from 'react';
 
-export function LoginPage() {
+export function SignupPage() {
   return (
     <div className="relative flex min-h-screen flex-col bg-black">
-      <main className="flex-1 flex items-center justify-center py-12 px-4 bg-black">
-        <div className="w-full max-w-md">
-          <LoginForm />
-        </div>
-      </main>
+      {/* Signup Page Content */}
     </div>
   );
 }
 
-export default LoginPage;
+export default SignupPage;
