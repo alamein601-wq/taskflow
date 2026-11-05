@@ -1,4 +1,3 @@
-
 import User from "../models/user.models.js";
 import jwt from "jsonwebtoken";
 
@@ -69,7 +68,9 @@ export const register = async (req, res) => {
         user: {
           id: user._id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          isPremium: user.isPremium,
+          paymentStatus: user.paymentStatus
         },
         token
       }
@@ -122,8 +123,7 @@ export const login = async (req, res) => {
       });
     }
 
-    const isPasswordValid =
-      await user.comparePassword(password);
+    const isPasswordValid = await user.comparePassword(password);
 
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -141,7 +141,9 @@ export const login = async (req, res) => {
         user: {
           id: user._id,
           name: user.name,
-          email: user.email
+          email: user.email,
+          isPremium: user.isPremium,
+          paymentStatus: user.paymentStatus
         },
         token
       }
@@ -157,11 +159,11 @@ export const login = async (req, res) => {
   }
 };
 
-// Get profile
+// Get profile (Updated with bKash and premium status)
 export const getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
-      .select("_id name email");
+      .select("_id name email isPremium paymentStatus bkashSenderNumber bkashTrxId");
 
     if (!user) {
       return res.status(404).json({
